@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Resume Curation</title>
+    <!-- Google Fonts for Premium Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./src/styles/index.css">
+  </head>
+  <body>
+    <div id="app">
+      <nav class="navbar">
+        <div class="logo">AI Resume Curator</div>
+        <div class="nav-links">
+          <span id="user-email"></span>
+          <button id="logout-btn" class="btn btn-secondary hidden">Logout</button>
+        </div>
+      </nav>
+
+      <main class="container">
+        <!-- Auth Section -->
+        <section id="auth-section" class="card fade-in">
+          <h2>Welcome Back</h2>
+          <p class="subtitle">Log in or create an account to start curating.</p>
+          <form id="auth-form">
+            <div class="input-group">
+              <label for="email">Email</label>
+              <input type="email" id="email" required>
+            </div>
+            <div class="input-group">
+              <label for="password">Password</label>
+              <input type="password" id="password" required>
+            </div>
+            <div class="btn-group">
+              <button type="button" id="login-btn" class="btn btn-primary">Login</button>
+              <button type="button" id="register-btn" class="btn btn-secondary">Register</button>
+            </div>
+            <p id="auth-error" class="error-text hidden"></p>
+          </form>
+        </section>
+
+        <!-- Dashboard Section -->
+        <section id="dashboard-section" class="hidden fade-in">
+          <!-- Base Resume -->
+          <div class="card resume-card">
+            <h3>Your Master Resume</h3>
+            <div id="resume-status">
+              <p>Loading...</p>
+            </div>
+            <div class="upload-zone" id="upload-zone">
+              <p>Drag & Drop your PDF resume here or click to upload</p>
+              <input type="file" id="resume-upload" accept=".pdf" class="hidden">
+            </div>
+          </div>
+
+          <!-- User Profile (Persistent) -->
+          <div class="card mb-6" id="profile-card" style="display: none;">
+            <h3>User Profile</h3>
+            <p class="subtitle">Your contact information is automatically used in every curated resume.</p>
+            <div class="input-row mt-4">
+              <div class="input-group">
+                <label>Email (Login)</label>
+                <input type="text" id="profile-email" readonly disabled>
+              </div>
+              <div class="input-group">
+                <label for="profile-phone">Phone Number</label>
+                <input type="tel" id="profile-phone" placeholder="+1 (555) 000-0000">
+              </div>
+            </div>
+            
+            <div id="social-links-section" class="mt-4">
+              <div class="flex justify-between items-center mb-2">
+                <label class="text-sm font-semibold text-muted">Social & Portfolio Links</label>
+                <button id="add-social-btn" class="btn btn-secondary btn-sm">+ Add Link</button>
+              </div>
+              <div id="social-links-container" class="flex flex-col gap-2">
+                <!-- Dynamic rows -->
+              </div>
+            </div>
+            <p class="text-xs text-muted mt-2">Changes are saved automatically.</p>
+          </div>
+
+          <!-- Start Curation -->
+          <div class="card job-card disabled" id="curation-card">
+            <h3>Tailor for a New Job</h3>
+
+            <div class="mt-4">
+              <label for="resume-selector" class="block text-sm font-medium mb-1">Select Base Resume</label>
+              <select id="resume-selector" class="input-field" style="background: #111; color: #fff; border: 1px solid #333; padding: 10px; width: 100%; border-radius: 8px;">
+                <option value="">Loading resumes...</option>
+              </select>
+            </div>
+            <div class="input-row">
+              <div class="input-group">
+                <label for="company-name">Company Name</label>
+                <input type="text" id="company-name" placeholder="e.g. Google, Amazon">
+              </div>
+              <div class="input-group">
+                <label for="target-role">Target Role</label>
+                <input type="text" id="target-role" placeholder="e.g. SDE II, Product Manager">
+              </div>
+            </div>
+            
+            <div class="tabs mt-4">
+              <button class="tab active" data-tab="url">URL</button>
+              <button class="tab" data-tab="text">Text</button>
+              <button class="tab" data-tab="history">History</button>
+            </div>
+            <div class="tab-content active" id="tab-url">
+              <input type="url" id="job-url" placeholder="https://linkedin.com/jobs/view/...">
+            </div>
+            <div class="tab-content" id="tab-text">
+              <textarea id="job-text" rows="5" placeholder="Paste the full job description here..."></textarea>
+            </div>
+            <div class="tab-content" id="tab-history">
+              <div id="history-list" class="history-grid">
+                <p>No past curations found.</p>
+              </div>
+            </div>
+            <button id="start-curation-btn" class="btn btn-primary mt-4 w-full">Start AI Curation</button>
+          </div>
+        </section>
+
+        <!-- Processing Section -->
+        <section id="processing-section" class="hidden card fade-in text-center">
+          <h2 id="processing-title">AI Agents at Work</h2>
+          <p id="processing-subtitle" class="subtitle">Iterating to hit >95% ATS match...</p>
+          <div class="loader"></div>
+          <div class="progress-steps mt-6">
+            <div class="step active" id="step-extract">Extracting Job Details</div>
+            <div class="step" id="step-gap">Analyzing Gaps</div>
+            <div class="step" id="step-curate">Curating Content</div>
+            <div class="step" id="step-score">Scoring ATS Match</div>
+          </div>
+          <p id="processing-status" class="mt-4">Initializing...</p>
+        </section>
+
+        <!-- Analysis Review Section (HITL) -->
+        <section id="review-section" class="hidden fade-in">
+          <div class="card text-center mb-6">
+            <h2>Analysis Complete</h2>
+            <p class="subtitle">Review the match quality before proceeding with full AI curation.</p>
+            <div class="score-circle mt-4">
+              <span id="initial-score-val">0</span><small>%</small>
+            </div>
+            <p class="mt-2 text-sm text-muted">Initial ATS Match Score</p>
+          </div>
+
+          <div id="alignment-warning" class="card warning-card mb-6 hidden">
+            <h3>⚠️ Role Alignment Warning</h3>
+            <p id="alignment-feedback" class="mt-2"></p>
+          </div>
+
+          <div class="grid-2-col">
+            <div class="card">
+              <h3>Missing Skills & Keywords</h3>
+              <ul id="review-missing-list" class="mt-2"></ul>
+            </div>
+            <div class="card">
+              <h3>Improvement Areas</h3>
+              <ul id="review-improvement-list" class="mt-2"></ul>
+            </div>
+          </div>
+
+          <div class="card mt-6 text-center">
+            <h3>Ready to optimize?</h3>
+            <p class="text-sm text-muted mb-4">The AI will now perform multiple iterations to naturally integrate these missing elements and rewrite your experience bullets.</p>
+            <div class="btn-group justify-center">
+              <button id="confirm-curation-btn" class="btn btn-primary">Proceed with Full Curation</button>
+              <button id="cancel-curation-btn" class="btn btn-secondary">Cancel</button>
+            </div>
+          </div>
+        </section>
+
+        <section id="results-section" class="hidden fade-in">
+          <div class="card results-header text-center">
+            <h2>Curation Results</h2>
+            <div class="score-circle">
+              <span id="final-score">--</span><small>%</small>
+            </div>
+            <p id="score-feedback" class="subtitle mt-2"></p>
+          </div>
+
+          <div class="grid-2-col mt-6">
+            <div class="card">
+              <h3>Target Job Requirements</h3>
+              <div id="job-info-preview" class="preview-box mt-2" style="max-height: 500px; overflow-y: auto; white-space: pre-wrap; font-size: 0.85rem; background: #111; color: #ccc; padding: 15px; border-radius: 8px;"></div>
+            </div>
+            <div class="card">
+              <h3>Curated Resume Preview</h3>
+              <pre id="resume-preview" class="preview-box mt-2" style="max-height: 500px; overflow-y: auto; font-size: 0.85rem; background: #111; color: #ccc; padding: 15px; border-radius: 8px;"></pre>
+            </div>
+          </div>
+
+          <div id="insights-section" class="card mt-6">
+            <h3>🚀 Curation Insights</h3>
+            <div class="insights-grid">
+              <div class="insight-item">
+                <span class="insight-label">Score Climb</span>
+                <div class="score-comparison">
+                  <span id="initial-score-display" class="score-val muted">--</span>
+                  <span class="arrow">→</span>
+                  <span id="final-score-display" class="score-val highlight">--</span>
+                </div>
+              </div>
+              <div class="insight-item">
+                <span class="insight-label">AI Consumption</span>
+                <div class="token-info">
+                  <span id="token-usage-display">In: 0 | Out: 0</span>
+                </div>
+              </div>
+              <div class="insight-item">
+                <span class="insight-label">Time Taken</span>
+                <div class="duration-info">
+                  <span id="duration-display" class="highlight">0s</span>
+                </div>
+              </div>
+            </div>
+            <div class="mt-4">
+              <h4>Detailed Improvements Made:</h4>
+              <ul id="improvement-list" class="mt-2 text-sm" style="list-style-type: disc; padding-left: 20px;">
+                <!-- Bullets will be injected here -->
+              </ul>
+            </div>
+          </div>
+
+          <div class="card mt-6 text-center">
+            <div class="btn-group justify-center">
+              <button id="view-pdf-btn" class="btn btn-primary">View PDF</button>
+              <button id="download-pdf-btn" class="btn btn-secondary">Download PDF</button>
+              <button id="download-docx-btn" class="btn btn-secondary">Download DOCX</button>
+              <button id="download-json-btn" class="btn btn-secondary">JSON</button>
+            </div>
+            <div class="mt-6">
+              <button id="back-btn" onclick="showDashboard()" class="btn btn-secondary">Back to Dashboard</button>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+    <script type="module" src="./src/main.js"></script>
+  </body>
+</html>
